@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.local
+.env*
+!.env.example
+
+# Only project-facing documentation is published; local notes stay on this machine.
+/docs/*
+!/docs/GUIDE.md
+!/docs/ARCHITECTURE.md
+!/docs/CREDITS.md
+!/docs/DEPLOYMENT.md
+!/docs/VALIDATION.md
+!/docs/PERFORMANCE.md
+!/docs/showcase/
+/docs/showcase/*
+!/docs/showcase/README.md
+!/docs/showcase/overview.png
+!/docs/showcase/earth.png
+!/docs/showcase/saturn.png
+!/docs/showcase/sun.png
+!/docs/showcase/mobile.png

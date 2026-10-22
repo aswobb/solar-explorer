@@ -1,0 +1,14 @@
+{
+  "id": "saturn-ring",
+  "file": "2k_saturn_ring_alpha.png",
+  "width": 2048,
+  "height": 125,
+  "bytes": 12119,
+  "sha256": "4b0644b2f3ef259fd0bfaedd9dc52f9e7d9738f65f50363e8c4dd19f650d7334",
+  "source": "https://www.solarsystemscope.com/textures/",
+  "originalDownload": "https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png",
+  "mirror": "https://raw.githubusercontent.com/Whitebee7/solarsystem/235e72c02e825e0c8d0792ec0aa6be43e1a14f68/textures/2k_saturn_ring_alpha.png",
+  "license": "CC-BY-4.0",
+  "retrievedOn": "2026-10-21",
+  "changes": "Downloaded mirror bytes unchanged"
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "earth-night",
+    "file": "2k_earth_nightmap.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 255287,
+    "sha256": "c16fd1bc096ab91a5c5265c6ff9847c43f489f2e2ee790ccdbcbd03251cf3a5a",
+    "source": "https://www.solarsystemscope.com/textures/",
+    "originalDownload": "https://www.solarsystemscope.com/textures/download/2k_earth_nightmap.jpg",
+    "mirror": "https://raw.githubusercontent.com/Whitebee7/solarsystem/235e72c02e825e0c8d0792ec0aa6be43e1a14f68/textures/2k_earth_nightmap.jpg",
+    "license": "CC-BY-4.0",
+    "retrievedOn": "2026-10-21",
+    "changes": "Downloaded mirror bytes unchanged"
+  },
+  {
+    "id": "earth-clouds",
+    "file": "2k_earth_clouds.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 965676,
+    "sha256": "fffd7f68d41b37274822150e54a6ef605af1d3ec35624d9f628c3b896bfa42ed",
+    "source": "https://www.solarsystemscope.com/textures/",
+    "originalDownload": "https://www.solarsystemscope.com/textures/download/2k_earth_clouds.jpg",
+    "mirror": "https://raw.githubusercontent.com/Whitebee7/solarsystem/235e72c02e825e0c8d0792ec0aa6be43e1a14f68/textures/2k_earth_clouds.jpg",
+    "license": "CC-BY-4.0",
+    "retrievedOn": "2026-10-21",
+    "changes": "Downloaded mirror bytes unchanged"
+  }
+]
