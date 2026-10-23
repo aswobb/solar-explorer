@@ -1,5 +1,7 @@
 # Solar Explorer
 
+**[▶ オンラインで試す](https://aswobb.github.io/solar-explorer/)**
+
 太陽と8つの惑星を、自分の視点で探索するインタラクティブな太陽系図鑑です。React / TypeScriptとWebGLによる3D表現、カメラ制御、科学データの表示を組み合わせています。バックエンドは使用しません。
 
 ![太陽系の全景](docs/showcase/overview.png)
@@ -48,7 +50,7 @@ npm run check:dist
 npm run preview
 ```
 
-`build` は型検査とViteビルドを実行し、`dist/` を生成します。`preview` は生成物をローカルで確認するサーバーです。公開デプロイは未実施です。
+`build` は型検査とViteビルドを実行し、`dist/` を生成します。`preview` は生成物をローカルで確認するサーバーです。公開版はGitHub Pagesで配信しています。[配信手順](docs/DEPLOYMENT.md)を参照してください。
 
 ## 技術と構成
 

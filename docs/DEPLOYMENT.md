@@ -1,8 +1,8 @@
-# 静的配信の準備
+# 静的配信
 
 [READMEへ戻る](../README.md)
 
-本手順はビルドとローカル検証までです。公開サイト、ドメイン、クラウド環境、CI/CDは作成していません。公開は別途明示的な承認後に行います。
+公開版：[Solar Explorer](https://aswobb.github.io/solar-explorer/)（2026-10-23公開）。GitHub Pagesで静的ファイルを配信しています。専用サーバーや独自ドメインは使用しません。
 
 ## 共通設定
 
@@ -17,7 +17,7 @@
 | パス | Viteの `base: './'`。ルートと任意のサブディレクトリに対応 |
 | ナビゲーション | ページ内ハッシュ。アプリ用のURLルーターは使わない |
 
-ホスト固有の設定ファイルはまだ追加していません。現在はプロバイダーに依存しない構成です。ソース、node_modules、開発用ドキュメントを配信ディレクトリに入れません。
+GitHub Pages用のワークフローを追加しています。生成物自体は通常の静的ホストでも配信できます。ソース、node_modules、開発用ドキュメントを配信ディレクトリに入れません。
 
 ## ビルドと検査
 
@@ -81,3 +81,11 @@ npm run preview -- --port 4176 --strictPort --base /solar-explorer/
 型検査、45テスト、ビルド、配信物検査が通過しました。画像を一時的に欠落させた検査では失敗し、復元後に通過することも確認しています。3D分包の500kB超警告は残り、フレームレートや実ホスト性能を示しません。
 
 [スクリーンショット](showcase/README.md) / [機能の総合検証](VALIDATION.md)
+
+## GitHub Pagesの更新
+
+[ワークフロー](../.github/workflows/pages.yml)はmainへのpushで動きます。READMEとdocsだけの変更は配信を省略します。必要ならActionsのRun workflowから手動実行できます。
+
+Node.js 24でnpm ci、テスト、型検査を含むビルド、配信物検査を順に実行し、成功時にdistだけを公開します。公式ActionsはコミットSHAで固定し、配信ジョブにのみpages:writeとid-token:writeを付与します。追加のアクセストークンをリポジトリに保存しません。Pagesの配信元はGitHub Actionsです。
+
+[初回の成功した配信](https://github.com/aswobb/solar-explorer/actions/runs/39926462626)で45テスト・ビルド・配信物検査が通過しました。公開URLでも画像12枚、地球の追従、全景復帰、3言語切り替えをブラウザで確認し、通常のwarn/errorは空でした。公開ホスト上のFPSや全端末の互換性は未測定です。
