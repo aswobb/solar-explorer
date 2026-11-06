@@ -29,7 +29,7 @@ npm run build
 npm run check:dist
 ```
 
-`check:dist` は生成HTMLの相対JS/CSS参照、参照先の存在、12枚の画像のサイズ・SHA256、3つの出典manifestと素材署名が元ファイルと同じことを検査します。ビルド前や不完全なコピーでは失敗します。クラウド側のHTTP設定やブラウザ動作を代わりに検査するものではありません。
+`check:dist` は生成HTMLの相対JS/CSS参照、参照先の存在、27枚の画像のサイズ・SHA256、6つの出典manifestと素材署名が元ファイルと同じことを検査します。ビルド前や不完全なコピーでは失敗します。クラウド側のHTTP設定やブラウザ動作を代わりに検査するものではありません。
 
 `dist/` は次の形です。ハッシュ付きファイル名はビルドごとに変わることがあります。
 
@@ -37,7 +37,7 @@ npm run check:dist
 dist/
   index.html
   assets/       # JS・CSS
-  textures/     # 画像12枚、manifest3枚、ATTRIBUTION.md
+  textures/     # 画像27枚、manifest6枚、ATTRIBUTION.md
 ```
 
 ## ルートとサブディレクトリの検証
@@ -89,3 +89,9 @@ npm run preview -- --port 4176 --strictPort --base /solar-explorer/
 Node.js 24でnpm ci、テスト、型検査を含むビルド、配信物検査を順に実行し、成功時にdistだけを公開します。公式ActionsはコミットSHAで固定し、配信ジョブにのみpages:writeとid-token:writeを付与します。追加のアクセストークンをリポジトリに保存しません。Pagesの配信元はGitHub Actionsです。
 
 [初回の成功した配信](https://github.com/aswobb/solar-explorer/actions/runs/39926462626)で45テスト・ビルド・配信物検査が通過しました。公開URLでも画像12枚、地球の追従、全景復帰、3言語切り替えをブラウザで確認し、通常のwarn/errorは空でした。公開ホスト上のFPSや全端末の互換性は未測定です。
+
+## P8 本地构建交付（2026-11-06）
+本轮生成并检查dist静态产物，另提供artifacts/solar-explorer-p8.zip与SHA256摘要。生产预览验证DEV故障参数不起作用，运行资源无需外部联网。当前未更新GitHub Pages等公开环境；实体手机GPU性能仍待验收。不要将本地P8构建验证等同于线上已部署。
+
+## P0–P8 扩展版发布（2026-11-06）
+用户已明确授权提交与部署。本次将扩展代码、资料、测试和验收证据提交到main并推送，沿用现有GitHub Actions Pages工作流发布；不更换域名或托管服务。提交前79项测试、类型检查、构建和27份纹理校验通过。执行结果可在 [Pages工作流](https://github.com/aswobb/solar-explorer/actions/workflows/pages.yml) 查看。P8本地验收章节中的“未部署”指当时的验收阶段；手机真机性能仍保留待验，不因本次发布自动勾选。

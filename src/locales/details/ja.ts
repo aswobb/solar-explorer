@@ -7,5 +7,6 @@ export const detailText = {
   definitionNote: '恒星周期は遠方の星を基準とした周期で、昼夜の長さとは異なります。軌道長半径は現在の太陽からの距離ではありません。',
   precisionNote: '教育向けの概数です。半径は小数1桁、時間は最大2桁、公転日数は最大1桁、角度は最大3桁に丸めています。精密な予測や計算には使用できません。',
   sources: '出典・定義', source: '出典', checked: 'データ取得日',
-  classes: { star: '恒星', terrestrial: '岩石惑星', 'gas-giant': 'ガス惑星', 'ice-giant': '氷惑星' },
+  parent: '公転の中心', moonNote: '衛星の自転は表示公転に同期し、同じ面を親天体へ向けます。軌道・軸・距離は模式的で、秤動・共鳴・食は再現しません。同期自転の参考時間は公転日数の24倍で換算し、不明な実測傾斜角は表示しません。',
+  classes: { comet: '彗星', 'dwarf-planet': '準惑星', asteroid: '小惑星', moon: '天然衛星', star: '恒星', terrestrial: '岩石惑星', 'gas-giant': 'ガス惑星', 'ice-giant': '氷惑星' },
 } as const

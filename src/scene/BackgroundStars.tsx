@@ -1,3 +1,6 @@
+import { useFrame, useThree } from '@react-three/fiber'
+import { useRef } from 'react'
+import type { Group } from 'three'
 import { qualitySettings, type Quality } from './quality'
 import { sceneConfig } from './displayConfig'
 import { useMemo } from 'react'
@@ -5,6 +8,9 @@ import { createStarPositions } from './starfield'
 import { Color } from 'three'
 
 export function BackgroundStars({ quality }: { quality: Quality }) {
+  const root = useRef<Group>(null)
+  const camera = useThree(state => state.camera)
+  useFrame(() => { if (root.current) root.current.position.copy(camera.position) })
   const { stars: count, brightStars: brightCount } = qualitySettings[quality]
   const positions = useMemo(() => createStarPositions(count, sceneConfig.starfield.innerRadius, sceneConfig.starfield.outerRadius), [count])
   const colors = useMemo(() => {
@@ -16,7 +22,7 @@ export function BackgroundStars({ quality }: { quality: Quality }) {
   const brightPositions = useMemo(() => positions.slice(0, brightCount * 3), [positions, brightCount])
   const brightColors = useMemo(() => colors.slice(0, brightCount * 3), [colors, brightCount])
   return (
-    <group name="decorative-background-stars">
+    <group ref={root} name="decorative-background-stars">
       <points raycast={() => {}}>
         <bufferGeometry key={count}><bufferAttribute attach="attributes-position" args={[positions, 3]} /><bufferAttribute attach="attributes-color" args={[colors, 3]} /></bufferGeometry>
         <pointsMaterial vertexColors size={sceneConfig.starfield.faintSize} sizeAttenuation transparent opacity={sceneConfig.starfield.faintOpacity} depthWrite={false} toneMapped={false} />

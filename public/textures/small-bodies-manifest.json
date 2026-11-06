@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ceres",
+    "file": "ceres.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 510464,
+    "sha256": "d4b9f70b72478f993b02892c3ad937f1eced4c5e822c3c659cf066f776279202",
+    "source": "https://science.nasa.gov/resource/ceres-3d-model/",
+    "originalDownload": "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/c/Ceres_1_1000.glb",
+    "originalSha256": "c43ec43aa8fb90aa8cf30660c2f2853cfac408d38149d1dc470490f4f4aa9899",
+    "imageName": "ceres_diff.jpg",
+    "license": "Public-Domain",
+    "credit": "NASA Visualization Technology Applications and Development (VTAD)",
+    "changes": "Extracted embedded base-color image; resized to 2048x1024; JPEG quality 90. Spherical display, not original 3D shape.",
+    "retrievedOn": "2026-11-02"
+  },
+  {
+    "id": "vesta",
+    "file": "vesta.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 707368,
+    "sha256": "3c8bcc86481057894adaf475286a3d0816e90402aa51bfb5119f6706d8599346",
+    "source": "https://science.nasa.gov/resource/vesta-3d-model/",
+    "originalDownload": "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/v/Vesta_1_100.glb",
+    "originalSha256": "6f00df4977c211a75fce65dd2badc9f39b12b58d3386e130c89f491dbc8f530b",
+    "imageName": "vesta_diff.jpg",
+    "license": "Public-Domain",
+    "credit": "NASA Visualization Technology Applications and Development (VTAD)",
+    "changes": "Extracted embedded base-color image; resized to 2048x1024; JPEG quality 90. Spherical display, not original 3D shape.",
+    "retrievedOn": "2026-11-02"
+  }
+]

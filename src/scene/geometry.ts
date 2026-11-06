@@ -18,3 +18,11 @@ export function overviewDistance(radius: number, fovDegrees: number, aspect: num
   const horizontalHalf = Math.atan(Math.tan(verticalHalf) * aspect)
   return radius * margin / Math.sin(Math.min(verticalHalf, horizontalHalf))
 }
+
+/** Inclined circular display orbit; eccentric orbit solving belongs to P5. */
+export function inclinedOrbitPosition(radius: number, angle: number, inclination: number = 0): [number, number, number] {
+  if (!Number.isFinite(inclination) || inclination < 0 || inclination > 180) throw new RangeError('Invalid orbital inclination')
+  const [x, , z] = orbitPosition(radius, angle)
+  const radians = inclination * Math.PI / 180
+  return [x, z * Math.sin(radians), z * Math.cos(radians)]
+}

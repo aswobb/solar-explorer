@@ -1,0 +1,17 @@
+[
+  {
+    "id": "pluto",
+    "file": "pluto.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 335725,
+    "sha256": "07c283ec9adf27091ff1c7c9ba08263208922bf8c192c32abaea6ee3cda8254d",
+    "source": "https://science.nasa.gov/resource/pluto-3d-model/",
+    "originalDownload": "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/p/l/Pluto_1_2374.glb",
+    "originalSha256": "9915e6874ff7e7cd64faf8ef016ea16de6c8058417c42909efa099a88f2dd25b",
+    "license": "Public-Domain",
+    "credit": "NASA VTAD",
+    "changes": "Extracted embedded base-color map, resized to 2048x1024, JPEG quality 90; spherical approximation.",
+    "retrievedOn": "2026-11-02"
+  }
+]

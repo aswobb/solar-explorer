@@ -1,15 +1,20 @@
+import { oortConfig } from './oortField'
+import { isOuterBody } from './outerScene'
+import { systemVisualRadius, isSatelliteSystem } from './satelliteSystems'
+import { viewDisplay } from './exploration'
 import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls'
 import { PerspectiveCamera, MOUSE, TOUCH, Vector3, type Object3D } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import { bodyVisualRadius, overviewRadius, sceneConfig } from './displayConfig'
+import { bodyVisualRadius, overviewRadius, outerOverviewRadius, sceneConfig } from './displayConfig'
 import { overviewDistance } from './geometry'
-import { controlLimits, orbitAngles, zoomDistance, type CameraCommand } from './cameraControl'
+import { controlLimits, orbitAngles, zoomDistance, type CameraCommand, type CameraSnapshot } from './cameraControl'
 import { focusConfig, focusDistance, focusLimits, transitionProgress, type CameraMode } from './focus'
 
 /** Single camera owner: motion (-2), OrbitControls (-1), follow/transition (0). */
-export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutput }: {
+export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutput, poseRef }: {
+  poseRef?: RefObject<CameraSnapshot | null>
   reducedMotion: boolean
   command: CameraCommand
   onModeChange: (mode: CameraMode) => void
@@ -17,6 +22,7 @@ export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutp
 }) {
   const controls = useRef<OrbitControlsImpl | null>(null)
   const manual = useRef(false)
+  const overviewKind = useRef<'inner' | 'outer' | 'oort'>('inner')
   const previousCommand = useRef(-1)
   const mode = useRef<CameraMode>('overview')
   const body = useRef<Object3D | null>(null)
@@ -28,18 +34,27 @@ export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutp
   const invalidate = useThree(state => state.invalidate)
   const report = useCallback(() => {
     const control = controls.current
+    if(control && poseRef) poseRef.current={position:camera.position.toArray(),target:control.target.toArray(),body:body.current?.name??null,min:control.minDistance,max:control.maxDistance,overview:overviewKind.current}
     if (control && debugOutput?.current) debugOutput.current.textContent = JSON.stringify({ mode: mode.current, enabled: control.enabled, position: camera.position.toArray(), target: control.target.toArray(), body: body.current?.name ?? null, bodyPosition: body.current ? body.current.getWorldPosition(vectors.current.target).toArray() : null, distance: camera.position.distanceTo(control.target), polar: control.getPolarAngle() })
-  }, [camera, debugOutput])
+  }, [camera, debugOutput, poseRef])
   const changeMode = useCallback((next: CameraMode) => { mode.current = next; onModeChange(next) }, [onModeChange])
 
   useLayoutEffect(() => {
     const control = controls.current
     if (!control || !(camera instanceof PerspectiveCamera) || size.width <= 0 || size.height <= 0) return
+    if(command.action==='restore')overviewKind.current=command.snapshot.overview
+    if (command.action === 'oort') overviewKind.current = 'oort'
+    if (command.action === 'outer') overviewKind.current = 'outer'
+    if (command.action === 'reset') overviewKind.current = 'inner'
+    const display = viewDisplay(overviewKind.current === 'oort' ? oortConfig.displayRadius : overviewKind.current === 'outer' || command.action === 'focus' && isOuterBody(command.bodyId) ? outerOverviewRadius : overviewRadius)
+    camera.near = display.near
+    camera.far = display.far
+    camera.updateProjectionMatrix()
     const v = vectors.current
     const fresh = previousCommand.current === -1
     const newCommand = previousCommand.current !== command.id
     const overviewPose = () => {
-      const distance = Math.min(controlLimits.maxDistance, overviewDistance(overviewRadius, camera.fov, size.width / size.height, sceneConfig.camera.framingMargin))
+      const distance = Math.min(control.maxDistance, overviewDistance(overviewKind.current === 'oort' ? oortConfig.displayRadius : overviewKind.current === 'outer' ? outerOverviewRadius : overviewRadius, camera.fov, size.width / size.height, sceneConfig.camera.framingMargin))
       v.destination.set(0, Math.sin(sceneConfig.camera.elevation) * distance, Math.cos(sceneConfig.camera.elevation) * distance)
       v.target.set(0, 0, 0)
     }
@@ -51,23 +66,31 @@ export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutp
         control.update()
         control.enableDamping = damping
       }
-      if (command.action === 'focus') {
-        const targetBody = scene.getObjectByName(command.bodyId)
+      if(command.action==='restore'){
+        const saved=command.snapshot
+        body.current=saved.body?scene.getObjectByName(saved.body)??null:null
+        control.minDistance=saved.min;control.maxDistance=saved.max
+        v.target.fromArray(saved.target);v.offset.fromArray(saved.position).sub(v.target)
+        if(body.current)body.current.getWorldPosition(v.target)
+        v.destination.copy(v.target).add(v.offset)
+        changeMode(body.current?'focusing':'returning')
+      } else if (command.action === 'focus' || command.action === 'track') {
+        const targetBody = scene.getObjectByName(command.action==='track'?command.objectName:command.bodyId)
         if (!targetBody) return
         body.current = targetBody
-        const radius = bodyVisualRadius(command.bodyId)
-        const distance = focusDistance(radius, camera.fov, size.width / size.height)
+        const radius = command.action==='track'?command.radius:command.framing === 'satellite-system' && isSatelliteSystem(command.bodyId) ? systemVisualRadius(command.bodyId) : bodyVisualRadius(command.bodyId)
+        const distance = focusDistance(command.action==='focus' && command.bodyId === 'halley' ? 2.4 : radius, camera.fov, size.width / size.height)
         const limits = focusLimits(radius, distance)
         control.minDistance = limits.min
-        control.maxDistance = limits.max
+        control.maxDistance = command.action==='track'?Math.min(900,limits.max):limits.max
         v.offset.copy(camera.position).sub(control.target).normalize().multiplyScalar(distance)
         body.current.getWorldPosition(v.target)
         v.destination.copy(v.target).add(v.offset)
         changeMode('focusing')
-      } else if (command.action === 'reset') {
+      } else if (command.action === 'reset' || command.action === 'outer' || command.action === 'oort') {
         body.current = null
         control.minDistance = controlLimits.minDistance
-        control.maxDistance = controlLimits.maxDistance
+        control.maxDistance = command.action === 'outer' || command.action === 'oort' ? 900 : controlLimits.maxDistance
         overviewPose()
         changeMode(fresh ? 'overview' : 'returning')
       } else {
@@ -83,8 +106,8 @@ export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutp
         camera.position.copy(control.target).add(v.offset)
         control.update()
       }
-      if (command.action === 'focus' || command.action === 'reset') {
-        manual.current = false
+      if (command.action === 'track' || command.action === 'restore' || command.action === 'focus' || command.action === 'reset' || command.action === 'outer' || command.action === 'oort') {
+        manual.current = command.action==='restore'
         v.startPosition.copy(camera.position)
         v.startTarget.copy(control.target)
         transition.current = { elapsed: 0, duration: fresh || reducedMotion ? 0 : focusConfig.duration }
@@ -96,7 +119,7 @@ export function OverviewCamera({ reducedMotion, command, onModeChange, debugOutp
         } else control.enabled = false
       }
       previousCommand.current = command.id
-    } else if (mode.current === 'returning') {
+    } else if (mode.current === 'returning' && command.action!=='restore') {
       overviewPose()
     } else if (mode.current === 'overview' && !manual.current) {
       overviewPose()

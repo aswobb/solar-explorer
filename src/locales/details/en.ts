@@ -7,5 +7,6 @@ export const detailText = {
   definitionNote: 'Sidereal periods use distant stars as a reference and differ from day length. The semi-major axis is not the current distance from the Sun.',
   precisionNote: 'Rounded values for education: radius up to 1 decimal place, hours up to 2, orbital days up to 1, and angles up to 3. Not for precise predictions or calculations.',
   sources: 'Sources and definitions', source: 'Source', checked: 'Data retrieved',
-  classes: { star: 'Star', terrestrial: 'Terrestrial planet', 'gas-giant': 'Gas giant', 'ice-giant': 'Ice giant' },
+  parent: 'Orbit center', moonNote: 'Satellite spin is synchronized with its display orbit. Circular orbits, axes and distances are illustrative; libration, resonances and eclipses are not simulated. Synchronous rotation hours are orbital days multiplied by 24; unavailable obliquities are omitted.',
+  classes: { comet: 'Comet', 'dwarf-planet': 'Dwarf planet', asteroid: 'Asteroid', moon: 'Natural satellite', star: 'Star', terrestrial: 'Terrestrial planet', 'gas-giant': 'Gas giant', 'ice-giant': 'Ice giant' },
 } as const

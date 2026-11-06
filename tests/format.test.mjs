@@ -26,8 +26,10 @@ test('every displayed quantity and description has a unique resolvable citation'
     const sources=bodySourceIds(body)
     assert.equal(sources.length,new Set(sources).size)
     assert.ok(sources.includes('nasa-notes'))
-    const required=[body.meanRadius.source,body.siderealRotation.source,...body.descriptionSources]
-    if(body.orbit) required.push(body.orbit.semiMajorAxis.source,body.orbit.siderealPeriod.source,body.orbit.obliquity.source)
+    const required=[body.meanRadius.source,...(body.siderealRotation ? [body.siderealRotation.source] : []),...body.descriptionSources]
+    if(body.orbit) required.push(body.orbit.semiMajorAxis.source,body.orbit.siderealPeriod.source)
+    if(body.orbit?.obliquity) required.push(body.orbit.obliquity.source)
+    if(body.orbit?.inclination) required.push(body.orbit.inclination.source)
     for(const source of required) assert.ok(sources.includes(source))
     for(const source of sources) assert.ok(scienceSources[source])
   }

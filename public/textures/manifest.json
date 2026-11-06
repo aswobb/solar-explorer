@@ -124,5 +124,18 @@
     "license": "CC-BY-4.0",
     "changes": "Downloaded mirror bytes unchanged",
     "retrievedOn": "2026-10-21"
+  },
+  {
+    "id": "moon",
+    "file": "moon.jpg",
+    "width": 2048,
+    "height": 1024,
+    "bytes": 1053869,
+    "sha256": "2764ba6535ea0481a062846ee033cc7a909dae05b31a8fd13f3e98f3a7fd92bd",
+    "source": "https://www.solarsystemscope.com/textures/",
+    "originalDownload": "https://www.solarsystemscope.com/textures/download/2k_moon.jpg",
+    "license": "CC-BY-4.0",
+    "changes": "Downloaded original bytes unchanged",
+    "retrievedOn": "2026-11-02"
   }
 ]

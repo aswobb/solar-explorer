@@ -80,3 +80,83 @@ WebGL2の一時プローブは直後にcontextを解放し、実際のcontext喪
 ## テストの役割
 
 純粋関数には軌道・時刻・取景・書式・ジェスチャー・画質・購読解除・画像解放のテストを置き、画像はハッシュと形式も照合します。CSSやDOM構造だけをなぞるテストは増やさず、選択・読み込み・例外復帰は実ブラウザで確認します。現在の証拠と未検証範囲は[検証記録](VALIDATION.md)を参照してください。
+
+
+## P0 扩展基础（2026-11-02）
+
+- `data/types.ts` 的 CatalogEntry / PhysicalCatalogEntry 为后续天体类别提供泛型合同；RegionDefinition 独立表示区域。当前实际 BodyId 仍严格对应九个已上线天体，避免虚构图鉴、贴图和翻译条目。
+- `hierarchy.ts` 验证 ID、父对象和循环，产生父级优先的更新顺序。SolarSystem 将局部轨道坐标与父级世界坐标合成，自转和轴倾角只作用于外观层，轨道线中心也随父级移动。
+- `simulationClock.ts` 统一暂停/恢复、倍率、delta 上限并预留 setTime；它驱动天体及现有太阳/地球效果。它是展示秒数，不是物理星历日期。
+- `exploration.ts` 区分 overview / system / outer 视图与目标选择，提供父级返回、隐藏选择清理合同和视图范围/裁剪配置。当前 system 入口使用已有天体近景，卫星系统范围会在 P1 扩展；outer 暂不向用户开放。
+- BasicScene 提供三语言图层入口，轨道与图鉴名称列表可切换。关闭名称不会隐藏物体或清除选中；后续隐藏实际物体的图层必须通过 visibleSelection 清理悬空目标。
+- qualitySettings 预留区域点、实例、标签与纹理预算，未来内容按该预算创建资源。现有纹理资源释放路径保持不变。
+
+
+## P1：地月系统
+
+- `BodyId` 加入 moon，`Moon` 使用 Earth-relative orbit 与 tidally-locked rotationModel；科学半径、周期、半长轴和轴倾角来自 NASA Moon Fact Sheet。现有 Planet 分类保持八大行星。
+- 月球在共享时钟下按父级世界坐标更新；`moonMotion.ts` 将 local +X 朝向地球，自转不采用独立压缩周期。显示自转轴不倾斜以维持简化锁定，图鉴仍保留真实参考轴倾角，并明确模型不模拟天平动、食或精确星历。
+- 地月局部视图沿用世界坐标与太阳原点光源，隐藏其他天体模型和地球绕日轨道，只保留地球、月球与月球轨道。渲染裁剪不会停止其他天体的逻辑时间。月球展示半径 0.245、轨道半径 3.6，与科学单位分离。
+- CameraCommand 的 earth-moon framing 对地球中心按整个系统外接范围取景、跟随地球；月球近景继续使用自身世界坐标与半径。切换视角不更换时钟。
+- 视图层级：overview → body earth → system earth → body moon；返回上一级反向遍历，返回全景直接 reset。body 和 system 是不同状态。
+- 地球详情通过 App → SceneViewport → BasicScene 的请求计数进入地月系统，支持反复进入，不使用 DOM 自定义事件。场景快捷入口和详情入口复用相同命令。
+- 默认全景隐藏月球；进入地月系统自动开启“显示月球”。用户关闭该层时如正在系统/月球近景则返回地球，清理已隐藏月球的选中状态。退出局部视图后保留显式开启的月球图层。
+- 月球纹理在模型挂载后加载、离开/隐藏后释放；局部视图显示设置仅汇总当前可见天体的纹理状态。
+
+
+## P2：统一卫星系统
+
+`MoonId` 包含六颗卫星，`SatelliteSystemId` 限定 earth / jupiter / saturn。`satelliteSystems.ts` 提供统一父级查询、可见天体 ID 与系统外接范围；场景、名称列表、纹理状态和相机共同使用该合同。`SystemRequest` 替代 P1 仅限地球的请求计数，详情入口与快捷导航复用 enterSystem。
+
+卫星旋转复用 lockedMoonSpin；NASA 来源只提供同步标记时，参考小时由轨道天数乘 24 得到。未提供的真实轴倾角为缺省，图鉴省略该行，避免拿轨道倾角冒充轴倾角。轨道与父天体自转仍分离，圆轨道不表现精确共振。
+
+systemVisualRadius 同时包含父天体外缘（含土星环）及子卫星轨道与外观。局部视图只挂载父天体与所属卫星，其他天体继续计算世界坐标但不占绘制及贴图资源。关闭卫星图层时返回父行星近景，不保留失效目标。
+
+SatelliteLabelProjector 在相机更新后，把世界坐标投影到原生 DOM 按钮，不逐帧更新 React 状态、不增加 GPU 文本绘制。标签受像素尺寸、视距、父天体球体遮挡、视口边界和 quality.labelLimit 约束；labelLayout 排除相互重叠。暂停中切换标签会主动 invalidate。卫星列表不受场景标签遮挡影响，保留完整选择入口。
+
+新增卫星贴图单独记录在 satellites-manifest.json，沿用 useBodyTexture 的按需加载、失败回退和卸载释放。土卫六用地表拼接纹理加暖色材质，并在图鉴明确说明。
+
+
+### P2 土星系统补充
+
+卫星 ID 扩展为十二颗，其中土星七颗按轨道远近排列。土星各显示轨道互不相交并位于土星环外；土卫六轨道改为 9.8，土卫八为 12.0。systemVisualRadius 自动按最外轨道更新。overviewRadius 通过 orbitalEnvelope 累加父子轨道半径，避免全景中打开卫星时漏算土卫八的最大日心展示距离。真实半径和距离不随显示参数变化。
+
+标签避让同时考虑所有可投影卫星和父天体外缘（含土星环）的屏幕圆形范围，避免一个可点击名称盖住另一颗模型而导致误选。
+
+
+## P3：小行星带
+
+- SmallBodyId 加入 ceres / vesta，分类为 dwarf-planet / asteroid，保留单一稳定 ID 供 P4 扩展。科学数据与压缩后的显示半径/轨道独立；snapshot 保存 JPL 原始参考值与轨道历元。
+- asteroidField.ts 根据固定种子生成有厚度、中心集聚、尺度和颜色变化的有限数组。显示内外半径 14–15.05，厚度半值 0.22；最大碎石半径 0.085，完全避开火星外缘与木星内缘。Ceres 在 14.78、Vesta 在 14.22，尺寸分别为 0.23 / 0.18。
+- AsteroidBelt 由一个共享低细分二十面体 InstancedMesh 加一个 Points 对象组成，共两次背景绘制。矩阵、颜色和点缓冲只在挂载/画质变化时建立，不逐帧创建 React 状态或上传每颗碎石位置。
+- 字段接受 SolarSystem 同一 time ref，在时钟更新后按统一代表周期旋转。背景旋转为示意，不逐颗解算轨道；暂停/倍率与天体一致。近景按相机到选中目标的距离降低群体透明度，避免形成碎石墙。
+- 背景 raycast 显式为空，不拦截天体拾取；只有两颗代表目标具有独立模型、事件和图鉴。R3F 负责卸载实例几何/材质、点缓冲，贴图沿用既有加载与释放机制。
+- region 图层默认开启；visibleBodyIds 第三个参数控制代表天体的可见性，渲染、列表和纹理汇总共享过滤。关闭图层时，如正在跟随谷神星/灶神星则 reset；卫星局部系统不挂载带状区域与代表天体。
+- 两档分别使用 1200 / 300 个碎石实例，以及 regionPoints 预算的 30%（1800 / 450 点），均不超过 P0 预算。少量点保持稀疏感，未给背景碎石添加标签。
+
+尘埃点使用圆形裁切，并限制屏幕尺寸最多 2.2 像素，避免贴近小天体时放大成方块；点/实例透明度随近景降低。
+
+
+## P4：外围与图鉴
+
+- OuterDwarf 独立登记 pluto / eris / haumea / makemake，仍是 dwarf-planet；与已有谷神星构成五颗矮行星，稳定 ID 不重复。population 区分 scattered-disk 与 trans-neptunian，appearance 区分 mapped 与 illustrative。
+- data/catalog.ts 跨中日英名称与英文 ID 搜索，支持 NFKC 规范化和分类；BodyCatalog 的所有条目均来自 bodies。隐藏目标也可搜索，选择时自动开启相应图层/局部系统。结果中保留卫星父级和外围分布类别。
+- 默认 overviewRadius 排除外围目标；outerOverviewRadius 单独容纳外侧最大路径。CameraCommand 增加 outer，相机按外围范围取景并扩大手动距离上限至 900，默认行星区仍为 320。进入外围前保存内侧目标，支持返回原先的行星/卫星；明确 reset 则返回行星全景。
+- KuiperRegion 是独立背景点云，标准 2400 / 轻量 600 点。与 P3 合计区域点数为 4200 / 1050，低于 P0 的 6000 / 1500 上限。点云在展示半径 40–60、厚度半值 2.4 的盘状区域生成，不包括单个已命名天体。
+- Kuiper 透明度由相机日心距离 115–205 的 smoothstep 控制，默认行星取景不显示外围；接近具体天体时点云逐渐淡出。标签同样受距离和可投影尺寸约束，使用既有 labelLayout 避开其他标签及天体。
+- Eris 的展示轨道半径为 75，位于主背景带之外，保留来源约 44° 轨道倾角。其余外围路径也保留倾角，均为圆形示意；inclinedOrbitPosition 与旋转后的轨道线使用同一轴约定。P5 将统一升级椭圆模型。
+- BackgroundStars 以相机为中心平移，不跟随相机旋转，星点方向保持一致；其 400–520 单位壳层是局部渲染范围，不是太阳系边界。它在相机回调之后更新，RendererReport 提供 skyOffset 验证。
+- textureFiles 允许 null，useBodyTexture 对缺少观测地图的目标报告 off，纹理状态汇总排除此类对象。Haumea 的 mesh 与选择轮廓使用相同示意轴比、同步旋转，取景按最长轴外接球计算。
+- BasicScene 独立通知视图种类与选中目标，App 的标题可正确显示“太阳系外围”；语言切换不重建时钟或 renderer。
+
+### P5：椭圆轨道与公共时间定位
+`kepler.ts` 采用有界 Newton / 二分回退求解 E−e sin E=M，支持方向、相位及三轴轨道定向。哈雷使用此路径；原行星、卫星与外围目标保留原圆轨道兼容路径。`TimeRequest` 在 SolarSystem 的 -2 帧回调先定位公共 SimulationClock，再重算全部天体；双尾在 -1 回调读同一时间，镜头继续读取移动目标。彗核不依赖效果组件或纹理加载。
+
+### P6：独立远景
+`OortCloud.tsx` 只在 oort 视图挂载，`oortField.ts` 将估计AU映射至半径80的独立对数坐标。近景组隐藏但保留公共时钟，隐藏时不响应选择。单一 OverviewCamera 新增 oort 命令，不创建第二相机/Canvas；视图保存完整近景body/system上下文。DistanceScale按同一映射绘制AU刻度。
+
+### P7：人造航天器与任务时钟
+`data/spacecraft.ts` 独立保存人造卫星代表参数及明确标识的艺术路线，保持与天然天体科学目录分离。EarthOrbiters读取SolarSystem公开的共享时间ref，在-1.5帧优先级更新地球中心与赤道相对轨道；不继承地球自转。MissionScene使用独立SimulationClock，并冻结隐藏主场景。OverviewCamera增加通用track和CameraSnapshot/restore命令，保留单一相机所有者。专题进入快照包含完整主视图、选择和相机姿态，切换任务不覆盖最初快照。SpacecraftModel按需创建程序几何。
+
+### P8：统一探索契约
+ExplorerNavigation统一分发原有视图动作；ExplorerLayers使用类型化选项，避免各专题重复维护开关。explorerCatalog在原科学目录上合并航天器入口，不将人造物伪装成CelestialBody。DisplaySettings常驻各视图，以sceneVisible控制可见资源状态。外围返回上下文增加craft选择；缩放/旋转不再清除craft选择。DEV RendererReport支持独立采样窗口、样本数和p95，性能证据与产品运行分离。

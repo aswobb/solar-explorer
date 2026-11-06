@@ -1,3 +1,5 @@
+import type { ExplorationView } from '../scene/exploration'
+import type { SystemRequest } from '../scene/satelliteSystems'
 import type { BodyId } from '../data/types'
 import { Component, lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useLocale } from '../locales/LocaleProvider'
@@ -38,7 +40,7 @@ class SceneErrorBoundary extends Component<{ children: ReactNode; onRetry: () =>
   }
 }
 
-function SceneContent({ preview, onRetry, onSelectionChange }: { preview: Preview; onRetry: () => void; onSelectionChange: (id: BodyId | null) => void }) {
+function SceneContent({ preview, onRetry, onSelectionChange, systemRequest, onViewChange }: { preview: Preview; onRetry: () => void; onSelectionChange: (id: BodyId | null) => void; systemRequest: SystemRequest; onViewChange: (view: ExplorationView['kind']) => void }) {
   const { messages: t } = useLocale()
   const [failed, setFailed] = useState(false)
   const fail = useCallback(() => setFailed(true), [])
@@ -64,12 +66,12 @@ function SceneContent({ preview, onRetry, onSelectionChange }: { preview: Previe
   if (preview === 'unsupported' || support === 'unsupported') return <SceneStatus kind="unsupported" onRetry={onRetry} />
   return (
     <Suspense fallback={<SceneStatus kind="loading" />}>
-      <BasicScene onSelectionChange={onSelectionChange} onFailure={fail} loading={<SceneStatus kind="loading" />} fallback={<p>{t.unsupportedBody}</p>} caption={t.sceneCaption} />
+      <BasicScene onViewChange={onViewChange} systemRequest={systemRequest} onSelectionChange={onSelectionChange} onFailure={fail} loading={<SceneStatus kind="loading" />} fallback={<p>{t.unsupportedBody}</p>} caption={t.sceneCaption} />
     </Suspense>
   )
 }
 
-export function SceneViewport({ onSelectionChange }: { onSelectionChange: (id: BodyId | null) => void }) {
+export function SceneViewport({ onSelectionChange, systemRequest, onViewChange }: { onSelectionChange: (id: BodyId | null) => void; systemRequest: SystemRequest; onViewChange: (view: ExplorationView['kind']) => void }) {
   const [preview, setPreview] = useState(getPreview)
   const [attempt, setAttempt] = useState(0)
   const [mounted, setMounted] = useState(true)
@@ -78,5 +80,5 @@ export function SceneViewport({ onSelectionChange }: { onSelectionChange: (id: B
     setPreview(null)
     setAttempt(value => value + 1)
   }
-  return <>{mounted && <SceneErrorBoundary key={attempt} onRetry={retry}><SceneContent preview={preview} onRetry={retry} onSelectionChange={onSelectionChange} /></SceneErrorBoundary>}{debug && <><button className="scene-debug-toggle" onClick={() => setMounted(value => !value)}>DEV: {mounted ? 'unmount scene' : 'mount scene'}</button><output data-renderer-report className="renderer-report" aria-label="DEV renderer counters" /></>}</>
+  return <>{mounted && <SceneErrorBoundary key={attempt} onRetry={retry}><SceneContent onViewChange={onViewChange} systemRequest={systemRequest} preview={preview} onRetry={retry} onSelectionChange={onSelectionChange} /></SceneErrorBoundary>}{debug && <><button className="scene-debug-toggle" onClick={() => setMounted(value => !value)}>DEV: {mounted ? 'unmount scene' : 'mount scene'}</button><output data-renderer-report className="renderer-report" aria-label="DEV renderer counters" /></>}</>
 }

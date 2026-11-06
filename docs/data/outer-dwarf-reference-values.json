@@ -1,0 +1,19 @@
+{
+  "retrievedOn": "2026-11-02",
+  "physicalSource": "https://ssd.jpl.nasa.gov/planets/phys_par.html",
+  "meanRadiusKm": {
+    "pluto": 1188.3,
+    "eris": 1200,
+    "haumea": 715,
+    "makemake": 714
+  },
+  "notes": "Representative source estimates, not exact current determinations. Eris source lists \u00b150 km; Makemake \u00b17 km. Mean radius is volume-equivalent, not Haumea display long axis. Pluto remaining values use GSFC fact sheet; other rotation/orbit values use separate SBDB snapshots.",
+  "plutoSource": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/plutofact.html",
+  "pluto": {
+    "semiMajorAxisKm": 5869656000,
+    "siderealPeriodDays": 90560,
+    "siderealRotationHours": -153.2928,
+    "inclinationDeg": 17.16,
+    "obliquityDeg": 119.51
+  }
+}

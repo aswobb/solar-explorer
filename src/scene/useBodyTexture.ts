@@ -10,7 +10,7 @@ export function useBodyTexture(id: TextureKey, enabled: boolean, onStatus: (id: 
   const gl = useThree(state => state.gl)
   useEffect(() => {
     setTexture(null)
-    if (!enabled) { onStatus(id, 'off'); invalidate(); return }
+    if (!enabled || !allTextureFiles[id]) { onStatus(id, 'off'); invalidate(); return }
     onStatus(id, 'loading')
     const forceFailure = import.meta.env.DEV && new URLSearchParams(location.search).get('textureFailure') === id
     const url = `${import.meta.env.BASE_URL}textures/${forceFailure ? 'missing-texture.jpg' : allTextureFiles[id]}`

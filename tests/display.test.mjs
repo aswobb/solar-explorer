@@ -1,11 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { PerspectiveCamera, Frustum, Matrix4, Vector3 } from 'three'
-import { bodyDisplay, bodyVisualRadius, overviewRadius, sceneConfig } from '../src/scene/displayConfig.ts'
+import { bodyDisplay, bodyVisualRadius, overviewRadius, outerOverviewRadius, sceneConfig } from '../src/scene/displayConfig.ts'
 import { orbitPosition, createOrbitPositions, overviewDistance } from '../src/scene/geometry.ts'
-import { bodyIds, planetIds } from '../src/data/types.ts'
+import { bodyIds, planetIds, outerBodyIds } from '../src/data/types.ts'
 
-test('display configuration covers exactly nine bodies with separate, nonintersecting radial bands', () => {
+test('display configuration covers all registered bodies with separate, nonintersecting radial bands', () => {
   assert.deepEqual(Object.keys(bodyDisplay), bodyIds)
   assert.equal(bodyDisplay.sun.orbitRadius, 0)
   for (const id of bodyIds) {
@@ -13,7 +13,7 @@ test('display configuration covers exactly nine bodies with separate, noninterse
     assert.ok(display.radius > 0 && Number.isFinite(display.radius))
     assert.ok(Number.isFinite(display.initialPhase))
     assert.match(display.color, /^#[0-9a-f]{6}$/i)
-    assert.ok(display.orbitRadius + bodyVisualRadius(id) <= overviewRadius)
+    assert.ok(display.orbitRadius + bodyVisualRadius(id) <= (outerBodyIds.includes(id) ? outerOverviewRadius : overviewRadius))
   }
   let previousOuter = bodyVisualRadius('sun')
   for (const id of planetIds) {
@@ -43,7 +43,7 @@ test('overview framing fully encloses every sphere across portrait and landscape
     camera.lookAt(0, 0, 0)
     camera.updateMatrixWorld(true)
     const frustum = new Frustum().setFromProjectionMatrix(new Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse))
-    for (const id of bodyIds) {
+    for (const id of bodyIds.filter(id => !outerBodyIds.includes(id))) {
       const display = bodyDisplay[id]
       const center = new Vector3(...orbitPosition(display.orbitRadius, display.initialPhase))
       for (const plane of frustum.planes) assert.ok(plane.distanceToPoint(center) >= bodyVisualRadius(id), `${id} clipped at aspect ${aspect}`)

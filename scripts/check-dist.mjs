@@ -15,7 +15,7 @@ for (const path of entries) {
   assert.ok((await stat(new URL(`dist/${path}`, root))).isFile(), `Missing ${path}`)
 }
 
-const manifests = ['manifest.json', 'earth-manifest.json', 'ring-manifest.json']
+const manifests = ['manifest.json', 'earth-manifest.json', 'ring-manifest.json', 'satellites-manifest.json', 'small-bodies-manifest.json', 'outer-manifest.json']
 const textures = []
 for (const name of [...manifests, 'ATTRIBUTION.md']) {
   const source = await read(`public/textures/${name}`)
@@ -26,12 +26,12 @@ for (const name of [...manifests, 'ATTRIBUTION.md']) {
     textures.push(...(Array.isArray(record) ? record : [record]))
   }
 }
-assert.equal(textures.length, 12)
-assert.equal(new Set(textures.map(texture => texture.file)).size, 12)
+assert.equal(textures.length, 27)
+assert.equal(new Set(textures.map(texture => texture.file)).size, 27)
 for (const texture of textures) {
   assert.match(texture.file, /^[\w.-]+\.(?:jpg|png)$/)
   const output = await read(`dist/textures/${texture.file}`)
   assert.equal(output.length, texture.bytes, `Wrong size: ${texture.file}`)
   assert.equal(hash(output), texture.sha256, `Wrong hash: ${texture.file}`)
 }
-console.log(`Verified ${fileURLToPath(new URL('dist/', root))}: relative entries, 12 textures and 4 unchanged credit/manifest files.`)
+console.log(`Verified ${fileURLToPath(new URL('dist/', root))}: relative entries, 27 textures and 7 unchanged credit/manifest files.`)

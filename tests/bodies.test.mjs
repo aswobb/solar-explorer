@@ -7,9 +7,9 @@ import { bodyTexts as ja } from '../src/locales/bodies/ja.ts'
 import { bodyTexts as zh } from '../src/locales/bodies/zh.ts'
 import { bodyTexts as en } from '../src/locales/bodies/en.ts'
 
-test('scope is exactly one Sun and eight ordered planets with unique stable IDs', () => {
-  assert.equal(bodies.length, 9)
-  assert.equal(new Set(bodies.map(body => body.id)).size, 9)
+test('scope is exactly one Sun, eight ordered planets and twelve moons and six small/dwarf bodies and one comet with unique stable IDs', () => {
+  assert.equal(bodies.length, 28)
+  assert.equal(new Set(bodies.map(body => body.id)).size, 28)
   assert.deepEqual(bodies.map(body => body.id), bodyIds)
   assert.deepEqual(planets.map(body => body.id), planetIds)
   assert.deepEqual(bodies.filter(body => body.kind === 'star').map(body => body.id), ['sun'])
@@ -28,9 +28,9 @@ test('all quantities are finite, carry expected units and resolvable official so
   }
   for (const body of bodies) {
     check(body.meanRadius, 'km')
-    check(body.siderealRotation, 'h')
+    if (body.siderealRotation) check(body.siderealRotation, 'h')
     assert.ok(body.meanRadius.value > 0)
-    assert.notEqual(body.siderealRotation.value, 0)
+    if (body.siderealRotation) assert.notEqual(body.siderealRotation.value, 0)
     assert.ok(body.descriptionSources.length > 0)
     for (const id of body.descriptionSources) assert.ok(scienceSources[id])
     if (body.kind === 'planet') {
@@ -56,7 +56,7 @@ test('unit normalization, retrograde signs and differential solar rotation are p
   assert.equal(sun.siderealRotation.value, 609.12)
   assert.ok(planets.find(body => body.id === 'jupiter').meanRadius.value < sun.meanRadius.value)
 })
-test('every supported language has exactly the same nine nonempty body descriptions', () => {
+test('every supported language has exactly the same twenty-eight nonempty body descriptions', () => {
   for (const dictionary of [ja, zh, en]) {
     assert.deepEqual(Object.keys(dictionary).sort(), [...bodyIds].sort())
     for (const id of bodyIds) {
